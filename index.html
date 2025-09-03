@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YouTube Premium API - Product List</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4a6cfa;
+      --primary-dark: #3a5bd9;
+      --secondary: #8b5cf6;
+      --accent: #10b981;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --darker: #0b1220;
+      --card-bg: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --success: #22c55e;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    /* Header Styles */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 15px 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      border-radius: 2px;
+    }
+    
+    .title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 600px;
+      margin: 0 auto 15px;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .history-btn {
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+    
+    .history-btn:hover {
+      background: #7c3aed;
+    }
+    
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    
+    /* For tablets and larger screens */
+    @media (min-width: 768px) {
+      .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .title {
+        font-size: 2.2rem;
+      }
+      
+      .subtitle {
+        font-size: 1.1rem;
+      }
+    }
+    
+    /* For desktop screens */
+    @media (min-width: 1024px) {
+      .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    .product-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .product-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      background: #0d1326;
+    }
+    
+    .product-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--accent);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .product-content {
+      padding: 14px;
+    }
+    
+    .product-name {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+    
+    .product-price {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .product-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .details-btn, .buy-btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    
+    .details-btn {
+      background: var(--secondary);
+      color: white;
+    }
+    
+    .details-btn:hover {
+      background: #7c3aed;
+    }
+    
+    .buy-btn {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .buy-btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: 16px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: var(--danger);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .modal-header {
+      margin-bottom: 16px;
+      padding-right: 30px;
+    }
+    
+    .modal-title {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+    
+    .modal-image {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    
+    .modal-details {
+      line-height: 1.7;
+      font-size: 14px;
+    }
+    
+    /* Payment Page */
+    #payment-page {
+      display: none;
+    }
+    
+    .back-btn {
+      background: var(--text-muted);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+    
+    .back-btn:hover {
+      background: #64748b;
+    }
+    
+    .checkout-panel {
+      background: var(--card-bg);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+    }
+    
+    .panel-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    @media (min-width: 640px) {
+      .panel-header {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+    
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px 12px;
+      border-radius: 50px;
+      font-size: 13px;
+    }
+    
+    .payment-method {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 13px;
+    }
+    
+    .payment-option.active {
+      background: rgba(74, 108, 250, 0.2);
+      border: 1px solid var(--primary);
+    }
+    
+    .payment-logo {
+      height: 20px;
+      width: auto;
+    }
+    
+    .payment-number {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    
+    .copy-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 12px;
+    }
+    
+    .copy-btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    .panel-body {
+      padding: 16px;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    
+    @media (min-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .form-group {
+      margin-bottom: 12px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    textarea.form-input {
+      min-height: 90px;
+      resize: vertical;
+    }
+    
+    .panel-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    @media (min-width: 640px) {
+      .panel-footer {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+    
+    .footer-note {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    
+    @media (min-width: 640px) {
+      .footer-note {
+        text-align: left;
+      }
+    }
+    
+    .confirm-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      margin: 0 auto;
+    }
+    
+    .confirm-btn:hover {
+      background: #0da271;
+    }
+    
+    /* Confirmation Popup */
+    .confirmation-popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1001;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    
+    .popup-content {
+      background: var(--card-bg);
+      border-radius: 16px;
+      max-width: 400px;
+      width: 100%;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    
+    .popup-icon {
+      font-size: 50px;
+      color: var(--success);
+      margin-bottom: 15px;
+    }
+    
+    .popup-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--success);
+    }
+    
+    .popup-message {
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    
+    .popup-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 16px;
+    }
+    
+    .popup-btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    /* Alerts */
+    .alert {
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      display: none;
+      text-align: center;
+    }
+    
+    .alert-success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #22c55e;
+    }
+    
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+    
+    /* History Modal */
+    .history-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    
+    .history-content {
+      background: var(--card-bg);
+      border-radius: 16px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    .history-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--primary);
+    }
+    
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .history-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    
+    .history-product {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+    
+    .history-details {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      font-size: 14px;
+    }
+    
+    @media (min-width: 640px) {
+      .history-details {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .history-date {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    
+    .empty-history {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-muted);
+    }
+    
+    /* Loading Spinner */
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Product Page -->
+    <div id="product-page">
+      <!-- Header -->
+      <div class="header">
+        <h1 class="title">YouTube Premium API</h1>
+        <p class="subtitle">একটি প্রোডাক্ট নির্বাচন করুন এবং পেমেন্ট সম্পন্ন করুন। প্রতিটি প্রোডাক্টের মূল্য ৩০ টাকা।</p>
+        <div class="header-actions">
+          <button class="history-btn" id="historyBtn">
+            <i class="fas fa-history"></i> ইতিহাস
+          </button>
+        </div>
+      </div>
+      
+      <!-- Products Grid -->
+      <div id="productGrid" class="product-grid">
+        <!-- Products will be dynamically inserted here -->
+      </div>
+    </div>
+    
+    <!-- Payment Page -->
+    <div id="payment-page">
+      <button class="back-btn" id="backBtn">
+        <i class="fas fa-arrow-left"></i> প্রোডাক্ট তালিকায় ফিরে যান
+      </button>
+      
+      <!-- Checkout Panel -->
+      <div class="checkout-panel">
+        <!-- Alerts -->
+        <div id="okMsg" class="alert alert-success">
+          <i class="fas fa-check-circle"></i> আপনার তথ্য জমা দেওয়া হয়েছে। এটি শীঘ্রই পর্যালোচনা করা হবে।
+        </div>
+        
+        <div id="errMsg" class="alert alert-error">
+          <i class="fas fa-exclamation-circle"></i> জমা দেওয়ার সময় একটি সমস্যাoccurred। দয়া করে আবার চেষ্টা করুন।
+        </div>
+        
+        <div class="panel-header">
+          <div class="info-badge">
+            <i class="fas fa-cube"></i> নির্বাচিত: <strong id="selName">—</strong>
+          </div>
+          
+          <div class="info-badge">
+            <i class="fas fa-tag"></i> মূল্য: <strong id="selPrice">—</strong>
+          </div>
+          
+          <div class="payment-method">
+            <div class="payment-option active" data-method="bKash">
+              <img src="https://i.postimg.cc/fWV9bwtb/BKash-b-Kash-Logo-wine.png" class="payment-logo" alt="bKash">
+              bKash
+            </div>
+            <div class="payment-option" data-method="Nagad">
+              <img src="https://i.postimg.cc/qv4q20Ry/Nagad-Logo-wine.png" class="payment-logo" alt="Nagad">
+              Nagad
+            </div>
+          </div>
+          
+          <div class="payment-number">
+            <span id="payNumber">01601735574</span>
+            <button class="copy-btn" id="copyBtn">
+              <i class="fas fa-copy"></i> কপি
+            </button>
+          </div>
+        </div>
+        
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">পেমেন্ট করার জন্য ব্যবহৃত নম্বর</label>
+              <input id="senderNumber" type="tel" class="form-input" placeholder="01XXXXXXXXX" maxlength="14">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">টেলিগ্রাম ব্যবহারকারীর নাম</label>
+              <input id="tgUsername" type="text" class="form-input" placeholder="@your_username">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">বিবরণ (লেনদেন আইডি/সমস্যা)</label>
+            <textarea id="details" class="form-input" placeholder="এখানে লিখুন..."></textarea>
+          </div>
+        </div>
+        
+        <div class="panel-footer">
+          <div class="footer-note">
+            <i class="fas fa-info-circle"></i> নিশ্চিত করার আগে দয়া করে সমস্ত তথ্য সঠিকভাবে প্রদান করুন।
+          </div>
+          
+          <button id="confirmBtn" class="confirm-btn">
+            <i class="fas fa-paper-plane"></i> নিশ্চিত করুন
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Details Modal -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-content">
+      <div class="close-modal" id="closeModal">
+        <i class="fas fa-times"></i>
+      </div>
+      
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalProductName">প্রোডাক্টের নাম</h2>
+      </div>
+      
+      <img src="" alt="প্রোডাক্টের ছবি" class="modal-image" id="modalProductImage">
+      
+      <div class="modal-details" id="modalProductDetails">
+        প্রোডাক্টের বিবরণ এখানে দেখানো হবে...
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Popup -->
+  <div class="confirmation-popup" id="confirmationPopup">
+    <div class="popup-content">
+      <div class="popup-icon" id="popupIcon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h2 class="popup-title" id="popupTitle">পেমেন্ট নিশ্চিত করা হয়েছে!</h2>
+      <p class="popup-message" id="popupMessage">
+        আপনার পেমেন্টটি কনফার্ম করা হয়েছে এবং এডমিনের কাছে সাবমিট করা হয়েছে। 
+        অল্প কিছুক্ষণের মধ্যে আপনার প্রোডাক্টটি আপনার টেলিগ্রাম আইডিতে ইনবক্সে দিয়ে দেওয়া হবে।
+      </p>
+      <button class="popup-btn" id="popupOkBtn">ঠিক আছে</button>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div class="history-modal" id="historyModal">
+    <div class="history-content">
+      <div class="close-modal" id="closeHistoryModal">
+        <i class="fas fa-times"></i>
+      </div>
+      
+      <h2 class="history-title">আপনার লেনদেনের ইতিহাস</h2>
+      
+      <div id="historyList" class="history-list">
+        <!-- History items will be inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ====== CONFIG ======
+  const BOT_TOKEN = "8007064633:AAHSngC4Gl3LtprUmJxaHAZNnmvvRY6bE8w";
+  const CHAT_ID   = "6140196943";
+  const PAY_NUMBER = "01601735574"; // bKash/Nagad
+
+  // Payment method logos
+  const bkashLogo = "https://i.postimg.cc/fWV9bwtb/BKash-b-Kash-Logo-wine.png";
+  const nagadLogo = "https://i.postimg.cc/qv4q20Ry/Nagad-Logo-wine.png";
+
+  // ====== PRODUCTS ======
+  const products = [
+    {
+      id: 1,
+      name: "YouTube Premium API - Product 1",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "এই প্রোডাক্টটি ইউটিউব প্রিমিয়াম API এর একটি উচ্চমানের সংস্করণ। এটি ব্যবহার করে আপনি ইউটিউব ভিডিও ডাউনলোড করতে পারবেন, অ্যাড-ফ্রি অভিজ্ঞতা উপভোগ করতে পারবেন এবং ব্যাকগ্রাউন্ডে ভিডিও চালাতে পারবেন। এই প্রোডাক্টটি এক মাসের জন্য বৈধ।"
+    },
+    {
+      id: 2,
+      name: "YouTube Premium API - Product 2",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "এই প্রোডাক্টটি বিশেষভাবে ডিজাইন করা হয়েছে যারা নিয়মিত ইউটিউব ব্যবহার করেন তাদের জন্য। এটি ব্যবহার করে আপনি HD ভিডিও ডাউনলোড করতে পারবেন এবং অফলাইন দেখতে পারবেন। একবার কিনলে এক মাস ব্যবহার করতে পারবেন।"
+    },
+    {
+      id: 3,
+      name: "YouTube Premium API - Product 3",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "এই প্রোডাক্টটির মাধ্যমে আপনি ইউটিউব প্রিমিয়ামের সকল সুবিধা পাবেন। এতে রয়েছে অ্যাড-ফ্রি ভিডিও স্ট্রিমিং, ব্যাকগ্রাউন্ড প্লেব্যাক এবং অফলাইন ডাউনলোডের সুবিধা। প্রিমিয়াম কোয়ালিটির ভিডিও উপভোগ করুন।"
+    },
+    {
+      id: 4,
+      name: "YouTube Premium API - Product 4",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "এই সংস্করণটি বিশেষভাবে উন্নত ফিচার সহ উপস্থাপন করা হয়েছে। আপনি 4K রেজুলেশনে ভিডিও ডাউনলোড করতে পারবেন এবং যেকোনো ডিভাইসে ব্যবহার করতে পারবেন। এক মাসের জন্য সাবস্ক্রিপশন।"
+    },
+    {
+      id: 5,
+      name: "YouTube Premium API - Product 5",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "এই প্রোডাক্টটির মাধ্যমে আপনি ইউটিউব মিউজিকও এক্সেস পাবেন। মিলিয়ন গানের সংগ্রহশালা থেকে আপনার পছন্দের গান শুনুন, অফলাইন সেভ করুন এবং অ্যাড-ফ্রি উপভোগ করুন। এক মাসের জন্য বৈধ।"
+    },
+    {
+      id: 6,
+      name: "YouTube Premium API - Product 6",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "বিশেষ অফার! এই প্রোডাক্টটিতে আপনি পাবেন এক্সট্রা স্টোরেজ সুবিধা। আপনার ডাউনলোড করা ভিডিও এবং মিউজিক সংরক্ষণ করুন অতিরিক্ত স্পেসে। ইউটিউব প্রিমিয়ামের সকল সুবিধা সহ।"
+    },
+    {
+      id: 7,
+      name: "YouTube Premium API - Product 7",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "এই সংস্করণটি বিশেষভাবে মোবাইল ব্যবহারকারীদের জন্য ডিজাইন করা হয়েছে। কম ডাটা খরচে HD ভিডিও স্ট্রিম করুন এবং অফলাইন দেখার জন্য ডাউনলোড করুন। এক মাসের সাবস্ক্রিপশন।"
+    },
+    {
+      id: 8,
+      name: "YouTube Premium API - Product 8",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "প্রিমিয়াম এক্সপিরিয়েন্সের জন্য এই প্রোডাক্টটি বেছে নিন। অ্যাড-ফ্রি ইউটিউব, ব্যাকগ্রাউন্ড প্লেব্যাক, এবং ইউটিউব মিউজিক এক্সেস - সবকিছু একসাথে। 30 দিনের জন্য বৈধ।"
+    },
+    {
+      id: 9,
+      name: "YouTube Premium API - Product 9",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "এই প্রোডাক্টটিতে আপনি পাবেন এক্সক্লুসিভ কনটেন্ট এক্সেস। কিছু বিশেষ চ্যানেলের কনটেন্ট শুধুমাত্র প্রিমিয়াম ব্যবহারকারীদের জন্য উন্মুক্ত। এক মাস ব্যবহারের সুযোগ।"
+    },
+    {
+      id: 10,
+      name: "YouTube Premium API - Product 10",
+      price: 30,
+      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
+      details: "সবচেয়ে জনপ্রিয় এই প্রোডাক্টটিতে আপনি পাবেন সকল সুবিধা। অ্যাড-ফ্রি ভিডিও, ব্যাকগ্রাউন্ড প্লেব্যাক, অফলাইন ডাউনলোড এবং ইউটিউব মিউজিক। 30 দিনের জন্য সক্রিয় থাকবে।"
+    }
+  ];
+
+  // DOM Elements
+  const productPage = document.getElementById('product-page');
+  const paymentPage = document.getElementById('payment-page');
+  const grid = document.getElementById('productGrid');
+  const backBtn = document.getElementById('backBtn');
+  const selName = document.getElementById('selName');
+  const selPrice = document.getElementById('selPrice');
+  const payNumber = document.getElementById('payNumber');
+  const copyBtn = document.getElementById('copyBtn');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const senderNumber = document.getElementById('senderNumber');
+  const tgUsername = document.getElementById('tgUsername');
+  const details = document.getElementById('details');
+  const okMsg = document.getElementById('okMsg');
+  const errMsg = document.getElementById('errMsg');
+  const paymentOptions = document.querySelectorAll('.payment-option');
+  const detailsModal = document.getElementById('detailsModal');
+  const closeModal = document.getElementById('closeModal');
+  const modalProductName = document.getElementById('modalProductName');
+  const modalProductImage = document.getElementById('modalProductImage');
+  const modalProductDetails = document.getElementById('modalProductDetails');
+  const confirmationPopup = document.getElementById('confirmationPopup');
+  const popupOkBtn = document.getElementById('popupOkBtn');
+  const popupIcon = document.getElementById('popupIcon');
+  const popupTitle = document.getElementById('popupTitle');
+  const popupMessage = document.getElementById('popupMessage');
+  const historyBtn = document.getElementById('historyBtn');
+  const historyModal = document.getElementById('historyModal');
+  const closeHistoryModal = document.getElementById('closeHistoryModal');
+  const historyList = document.getElementById('historyList');
+
+  payNumber.textContent = PAY_NUMBER;
+
+  let selectedId = null;
+  let selectedMethod = 'bKash';
+
+  // Render Products
+  function renderProducts() {
+    grid.innerHTML = products.map(p => `
+      <div class="product-card">
+        <div class="product-badge">প্রোডাক্ট ${p.id}</div>
+        <img class="product-image" src="${p.image}" alt="${p.name}">
+        <div class="product-content">
+          <h3 class="product-name">${p.name}</h3>
+          <div class="product-price">৳ ${p.price}</div>
+          <div class="product-actions">
+            <button class="details-btn" data-id="${p.id}">
+              <i class="fas fa-info-circle"></i> বিস্তারিত
+            </button>
+            <button class="buy-btn" data-id="${p.id}">
+              <i class="fas fa-shopping-cart"></i> কিনুন
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Add event listeners to buttons
+    grid.querySelectorAll('.details-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = Number(e.currentTarget.dataset.id);
+        showProductDetails(id);
+      });
+    });
+
+    grid.querySelectorAll('.buy-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = Number(e.currentTarget.dataset.id);
+        selectProduct(id);
+        showPaymentPage();
+      });
+    });
+  }
+
+  // Show product details in modal
+  function showProductDetails(id) {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    
+    modalProductName.textContent = product.name;
+    modalProductImage.src = product.image;
+    modalProductDetails.textContent = product.details;
+    
+    detailsModal.style.display = 'flex';
+  }
+
+  // Select a product
+  function selectProduct(id) {
+    selectedId = id;
+    updateSummary();
+  }
+
+  // Show payment page
+  function showPaymentPage() {
+    productPage.style.display = 'none';
+    paymentPage.style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+
+  // Show product page
+  function showProductPage() {
+    paymentPage.style.display = 'none';
+    productPage.style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+
+  // Update summary in payment page
+  function updateSummary() {
+    const p = products.find(x => x.id === selectedId);
+    if (!p) {
+      selName.textContent = '—';
+      selPrice.textContent = '—';
+      return;
+    }
+    selName.textContent = `${p.name}`;
+    selPrice.textContent = `৳ ${p.price}`;
+  }
+
+  // Payment method selection
+  paymentOptions.forEach(option => {
+    option.addEventListener('click', () => {
+      paymentOptions.forEach(opt => opt.classList.remove('active'));
+      option.classList.add('active');
+      selectedMethod = option.dataset.method;
+    });
+  });
+
+  // Save transaction to local storage
+  function saveTransaction(data) {
+    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+    transactions.unshift({
+      id: Date.now(),
+      date: new Date().toLocaleString('bn-BD'),
+      ...data
+    });
+    
+    // Keep only the last 50 transactions
+    if (transactions.length > 50) {
+      transactions = transactions.slice(0, 50);
+    }
+    
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+    return true;
+  }
+
+  // Load transactions from local storage
+  function loadTransactions() {
+    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+    
+    if (transactions.length === 0) {
+      historyList.innerHTML = `
+        <div class="empty-history">
+          <i class="fas fa-history" style="font-size: 48px; margin-bottom: 15px;"></i>
+          <p>আপনার কোনো লেনদেনের ইতিহাস নেই</p>
+        </div>
+      `;
+      return;
+    }
+    
+    historyList.innerHTML = transactions.map(transaction => `
+      <div class="history-item">
+        <div class="history-product">${transaction.productName}</div>
+        <div class="history-details">
+          <div><strong>মূল্য:</strong> ৳ ${transaction.price}</div>
+          <div><strong>পেমেন্ট মাধ্যম:</strong> ${transaction.paymentMethod}</div>
+          <div><strong>টেলিগ্রাম:</strong> ${transaction.tgUsername}</div>
+          <div><strong>পেমেন্ট নম্বর:</strong> ${transaction.senderNumber}</div>
+        </div>
+        <div class="history-date">${transaction.date}</div>
+      </div>
+    `).join('');
+  }
+
+  // Show history modal
+  function showHistoryModal() {
+    loadTransactions();
+    historyModal.style.display = 'flex';
+  }
+
+  // Initialize
+  renderProducts();
+
+  // Event listeners
+  backBtn.addEventListener('click', showProductPage);
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(PAY_NUMBER);
+      copyBtn.innerHTML = '<i class="fas fa-check"></i> কপি হয়েছে!';
+      setTimeout(() => {
+        copyBtn.innerHTML = '<i class="fas fa-copy"></i> কপি';
+      }, 2000);
+    } catch (err) {
+      alert('কপি করতে ব্যর্থ: ' + err);
+    }
+  });
+
+  // Close modals
+  closeModal.addEventListener('click', () => {
+    detailsModal.style.display = 'none';
+  });
+
+  detailsModal.addEventListener('click', (e) => {
+    if (e.target === detailsModal) {
+      detailsModal.style.display = 'none';
+    }
+  });
+
+  closeHistoryModal.addEventListener('click', () => {
+    historyModal.style.display = 'none';
+  });
+
+  historyModal.addEventListener('click', (e) => {
+    if (e.target === historyModal) {
+      historyModal.style.display = 'none';
+    }
+  });
+
+  historyBtn.addEventListener('click', showHistoryModal);
+
+  // Close confirmation popup
+  popupOkBtn.addEventListener('click', () => {
+    confirmationPopup.style.display = 'none';
+    showProductPage();
+  });
+
+  // Send message to Telegram using a proxy
+  async function sendToTelegram(text) {
+    // Using a proxy to avoid CORS issues
+    const proxyUrl = 'https://corsproxy.io/?';
+    const apiUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    
+    try {
+      const response = await fetch(proxyUrl + encodeURIComponent(apiUrl), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: text,
+          parse_mode: 'HTML'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Telegram API error: ' + response.status);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error sending message to Telegram:', error);
+      
+      // Fallback: open in a new tab
+      const textEncoded = encodeURIComponent(text);
+      const fallbackUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&parse_mode=HTML&text=${textEncoded}`;
+      window.open(fallbackUrl, '_blank');
+      
+      return { ok: true, fallback: true };
+    }
+  }
+
+  // Form validation
+  function validate() {
+    if (!selectedId) return 'দয়া করে একটি প্রোডাক্ট নির্বাচন করুন';
+    if (!senderNumber.value.trim()) return 'দয়া করে আপনার পেমেন্ট নম্বর লিখুন';
+    if (!tgUsername.value.trim()) return 'দয়া করে আপনার টেলিগ্রাম ব্যবহারকারীর নাম লিখুন';
+    return null;
+  }
+
+  // Confirm button handler
+  confirmBtn.addEventListener('click', async () => {
+    okMsg.style.display = 'none';
+    errMsg.style.display = 'none';
+
+    const err = validate();
+    if (err) {
+      alert(err);
+      return;
+    }
+
+    const p = products.find(x => x.id === selectedId);
+    const msg = [
+      '<b>🧾 নতুন পেমেন্টের বিবরণ</b>',
+      `প্রোডাক্ট: ${p.name}`,
+      `মূল্য: ৳ ${p.price}`,
+      `পেমেন্ট মাধ্যম: ${selectedMethod}`,
+      `পেমেন্ট নম্বর: ${PAY_NUMBER}`,
+      `প্রেরকের নম্বর: ${senderNumber.value.trim()}`,
+      `টেলিগ্রাম: ${tgUsername.value.trim()}`,
+      `বিবরণ: ${details.value.trim() || '—'}`,
+      `সময়: ${new Date().toLocaleString('bn-BD')}`
+    ].join('\n');
+
+    // Show loading state in confirmation popup
+    popupIcon.innerHTML = '<div class="loading-spinner"></div>';
+    popupTitle.textContent = 'অনুগ্রহ করে অপেক্ষা করুন...';
+    popupMessage.textContent = 'আপনার অনুরোধটি এডমিনের কাছে পাঠানো হচ্ছে।';
+    popupOkBtn.style.display = 'none';
+    confirmationPopup.style.display = 'flex';
+
+    try {
+      const res = await sendToTelegram(msg);
+      
+      if (res && res.ok) {
+        // Save transaction to history
+        saveTransaction({
+          productName: p.name,
+          price: p.price,
+          paymentMethod: selectedMethod,
+          senderNumber: senderNumber.value.trim(),
+          tgUsername: tgUsername.value.trim(),
+          details: details.value.trim()
+        });
+        
+        // Show success message
+        popupIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+        popupTitle.textContent = 'পেমেন্ট নিশ্চিত করা হয়েছে!';
+        popupMessage.innerHTML = `
+          আপনার পেমেন্টটি কনফার্ম করা হয়েছে এবং এডমিনের কাছে সাবমিট করা হয়েছে। 
+          অল্প কিছুক্ষণের মধ্যে আপনার প্রোডাক্টটি আপনার টেলিগ্রাম আইডিতে ইনবক্সে দিয়ে দেওয়া হবে।
+        `;
+        popupOkBtn.style.display = 'block';
+        
+        // Reset form
+        senderNumber.value = '';
+        tgUsername.value = '';
+        details.value = '';
+      } else {
+        throw new Error('Failed to send');
+      }
+    } catch (e) {
+      // Show error message
+      popupIcon.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>';
+      popupTitle.textContent = 'ত্রুটি হয়েছে!';
+      popupMessage.textContent = 'আপনার অনুরোধ পাঠানো যায়নি। দয়া করে আবার চেষ্টা করুন।';
+      popupOkBtn.style.display = 'block';
+      popupOkBtn.textContent = 'পুনরায় চেষ্টা করুন';
+      
+      // Revert the button text on next click
+      const originalText = popupOkBtn.innerHTML;
+      popupOkBtn.addEventListener('click', function revert() {
+        popupOkBtn.textContent = 'ঠিক আছে';
+        popupOkBtn.removeEventListener('click', revert);
+      }, { once: true });
+    }
+  });
+  </script>
+</body>
+</html>
