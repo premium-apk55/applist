@@ -84,9 +84,11 @@
       display: flex;
       gap: 10px;
       margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     
-    .history-btn {
+    .history-btn, .review-btn {
       background: var(--secondary);
       color: white;
       border: none;
@@ -100,8 +102,16 @@
       font-size: 14px;
     }
     
-    .history-btn:hover {
+    .history-btn:hover, .review-btn:hover {
       background: #7c3aed;
+    }
+    
+    .review-btn {
+      background: var(--accent);
+    }
+    
+    .review-btn:hover {
+      background: #0da271;
     }
     
     /* Product Grid */
@@ -591,7 +601,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 极速加速器, 0.8);
       backdrop-filter: blur(5px);
       z-index: 1000;
       justify-content: center;
@@ -676,6 +686,143 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    
+    /* Review Section Styles */
+    .review-section {
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .section-title {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: var(--primary);
+    }
+    
+    .review-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    
+    @media (min-width: 768px) {
+      .review-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .review-form {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+    
+    .review-list {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    .review-item {
+      padding: 15px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 15px;
+    }
+    
+    .review-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .reviewer-name {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .review-date {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    
+    .review-rating {
+      color: gold;
+      margin-bottom: 8px;
+    }
+    
+    .review-text {
+      line-height: 1.5;
+    }
+    
+    .no-reviews {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 20px;
+    }
+    
+    .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+      margin-bottom: 15px;
+    }
+    
+    .star-rating input {
+      display: none;
+    }
+    
+    .star-rating label {
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #444;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+    
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+      background: gold;
+      color: #333;
+    }
+    
+    .review-submit-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+      font-size: 16px;
+    }
+    
+    .review-submit-btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    /* Game ID Field */
+    .game-id-field {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -688,7 +835,10 @@
         <p class="subtitle">একটি প্রোডাক্ট নির্বাচন করুন এবং পেমেন্ট সম্পন্ন করুন। প্রতিটি প্রোডাক্টের মূল্য ৩০ টাকা।</p>
         <div class="header-actions">
           <button class="history-btn" id="historyBtn">
-            <i class="fas fa-history"></i> ইতিহাস
+            <i class="fas fa-history"></i> লেনদেন ইতিহাস
+          </button>
+          <button class="review-btn" id="reviewBtn">
+            <i class="fas fa-star"></i> রিভিউ দেখুন
           </button>
         </div>
       </div>
@@ -697,6 +847,59 @@
       <div id="productGrid" class="product-grid">
         <!-- Products will be dynamically inserted here -->
       </div>
+      
+      <!-- Review Section -->
+      <section class="review-section" id="reviewSection">
+        <h2 class="section-title">গ্রাহকদের রিভিউ</h2>
+        
+        <div class="review-container">
+          <!-- Review Form -->
+          <div class="review-form">
+            <h3 style="margin-bottom: 20px; text-align: center;">আপনার রিভিউ লিখুন</h3>
+            
+            <form id="reviewForm">
+              <div class="form-group">
+                <label class="form-label">আপনার নাম</label>
+                <input type="text" id="reviewerName" class="form-input" placeholder="আপনার নাম লিখুন" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">রেটিং</label>
+                <div class="star-rating">
+                  <input type="radio" id="star5" name="rating" value="5">
+                  <label for="star5"><i class="fas fa-star"></i></label>
+                  <input type="radio" id="star4" name="rating" value="4">
+                  <label for="star4"><i class="fas fa-star"></i></label>
+                  <input type="radio" id="star3" name="rating" value="3">
+                  <label for="star3"><i class="fas fa-star"></i></label>
+                  <input type="radio" id="star2" name="rating" value="2">
+                  <label for="star2"><i class="fas fa-star"></i></label>
+                  <input type="radio" id="star1" name="rating" value="1" required>
+                  <label for="star1"><i class="fas fa-star"></i></label>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">আপনার রিভিউ</label>
+                <textarea id="reviewText" class="form-input" placeholder="আপনার অভিজ্ঞতা শেয়ার করুন..." rows="4" required></textarea>
+              </div>
+              
+              <button type="submit" class="review-submit-btn">
+                <i class="fas fa-paper-plane"></i> রিভিউ সাবমিট করুন
+              </button>
+            </form>
+          </div>
+          
+          <!-- Review List -->
+          <div class="review-list">
+            <h3 style="margin-bottom: 20px; text-align: center;">অন্যান্য গ্রাহকদের রিভিউ</h3>
+            
+            <div id="reviewsList">
+              <!-- Reviews will be dynamically inserted here -->
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
     
     <!-- Payment Page -->
@@ -755,6 +958,12 @@
               <label class="form-label">টেলিগ্রাম ব্যবহারকারীর নাম</label>
               <input id="tgUsername" type="text" class="form-input" placeholder="@your_username">
             </div>
+          </div>
+          
+          <!-- Game ID Field (only for Color Trading product) -->
+          <div class="form-group game-id-field" id="gameIdField">
+            <label class="form-label">আপনার গেম ইউজার আইডি</label>
+            <input id="gameUserId" type="text" class="form-input" placeholder="আপনার গেম ইউজার আইডি দিন">
           </div>
           
           <div class="form-group">
@@ -838,11 +1047,18 @@
   // ====== PRODUCTS ======
   const products = [
     {
+      id: 6,
+      name: "Color Trading Hack - Life Time 🚀",
+      price: 120,
+      image: "https://i.postimg.cc/J41g7qtD/20250903-201703.jpg",
+      details: "বিশেষ অফার! এই প্রোডাক্টটিতে আপনি পাবেন এক্সট্রা স্টোরেজ সুবিধা। আপনার ডাউনলোড করা ভিডিও এবং মিউজিক সংরক্ষণ করুন অতিরিক্ত স্পেসে। ইউটিউব প্রিমিয়ামের সকল সুবিধা সহ।"
+    },
+    {
       id: 1,
       name: "YouTube Premium APK - Life Time 🚀",
       price: 30,
       image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
-      details: "এই প্রোডাক্টটি ইউটিউব প্রিমিয়াম API এর একটি উচ্চমানের সংস্করণ। এটি ব্যবহার করে আপনি ইউটিউব ভিডিও ডাউনলোড করতে পারবেন, অ্যাড-ফ্রি অভিজ্ঞতা উপভোগ করতে পারবেন এবং ব্যাকগ্রাউন্ডে ভিডিও চালাতে পারবেন। এই প্রোডাক্টটি লাইফ টাইম এর জন্য বৈধ।"
+      details: "এই প্রোডак্টটি ইউটিউব প্রিমিয়াম API এর একটি উচ্চমানের সংস্করণ। এটি ব্যবহার করে আপনি ইউটিউব ভিডিও ডাউনলোড করতে পারবেন, অ্যাড-ফ্রি অভিজ্ঞতা উপভোগ করতে পারবেন এবং ব্যাকগ্রাউন্ডে ভিডিও চালাতে পারবেন। এই প্রোডাক্টটি লাইফ টাইম এর জন্য বৈধ।"
     },
     {
       id: 2,
@@ -871,13 +1087,6 @@
       price: 30,
       image: "https://i.postimg.cc/28yVXGtd/unnamed-1.png",
       details: "কোনো এড নেই, খুব ফাস্ট ও স্মুথ পারফরম্যান্স, সম্পূর্ণ সিকিউর এবং প্রাইভেট, সহজেই ব্যবহারযোগ্য এবং একবার নিলে লাইফটাইমের জন্য ব্যবহার করতে পারবেন।"
-    },
-    {
-      id: 6,
-      name: "YouTube Premium API - Product 6",
-      price: 30,
-      image: "https://i.postimg.cc/yYGcTMFd/images.jpg",
-      details: "বিশেষ অফার! এই প্রোডাক্টটিতে আপনি পাবেন এক্সট্রা স্টোরেজ সুবিধা। আপনার ডাউনলোড করা ভিডিও এবং মিউজিক সংরক্ষণ করুন অতিরিক্ত স্পেসে। ইউটিউব প্রিমিয়ামের সকল সুবিধা সহ।"
     },
     {
       id: 7,
@@ -921,6 +1130,8 @@
   const confirmBtn = document.getElementById('confirmBtn');
   const senderNumber = document.getElementById('senderNumber');
   const tgUsername = document.getElementById('tgUsername');
+  const gameUserId = document.getElementById('gameUserId');
+  const gameIdField = document.getElementById('gameIdField');
   const details = document.getElementById('details');
   const okMsg = document.getElementById('okMsg');
   const errMsg = document.getElementById('errMsg');
@@ -936,9 +1147,13 @@
   const popupTitle = document.getElementById('popupTitle');
   const popupMessage = document.getElementById('popupMessage');
   const historyBtn = document.getElementById('historyBtn');
+  const reviewBtn = document.getElementById('reviewBtn');
+  const reviewSection = document.getElementById('reviewSection');
   const historyModal = document.getElementById('historyModal');
   const closeHistoryModal = document.getElementById('closeHistoryModal');
   const historyList = document.getElementById('historyList');
+  const reviewForm = document.getElementById('reviewForm');
+  const reviewsList = document.getElementById('reviewsList');
 
   payNumber.textContent = PAY_NUMBER;
 
@@ -1006,6 +1221,13 @@
     productPage.style.display = 'none';
     paymentPage.style.display = 'block';
     window.scrollTo(0, 0);
+    
+    // Show/hide game ID field based on selected product
+    if (selectedId === 6) { // Color Trading Hack product
+      gameIdField.style.display = 'block';
+    } else {
+      gameIdField.style.display = 'none';
+    }
   }
 
   // Show product page
@@ -1088,8 +1310,60 @@
     historyModal.style.display = 'flex';
   }
 
+  // Save review to local storage
+  function saveReview(data) {
+    let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+    reviews.unshift({
+      id: Date.now(),
+      date: new Date().toLocaleString('bn-BD'),
+      ...data
+    });
+    
+    // Keep only the last 50 reviews
+    if (reviews.length > 50) {
+      reviews = reviews.slice(0, 50);
+    }
+    
+    localStorage.setItem('reviews', JSON.stringify(reviews));
+    return true;
+  }
+
+  // Load reviews from local storage
+  function loadReviews() {
+    const reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+    
+    if (reviews.length === 0) {
+      reviewsList.innerHTML = `
+        <div class="no-reviews">
+          <i class="fas fa-comment-slash" style="font-size: 48px; margin-bottom: 15px;"></i>
+          <p>কোনো রিভিউ পাওয়া যায়নি</p>
+        </div>
+      `;
+      return;
+    }
+    
+    reviewsList.innerHTML = reviews.map(review => `
+      <div class="review-item">
+        <div class="review-header">
+          <span class="reviewer-name">${review.name}</span>
+          <span class="review-date">${review.date}</span>
+        </div>
+        <div class="review-rating">
+          ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+        </div>
+        <div class="review-text">${review.text}</div>
+      </div>
+    `).join('');
+  }
+
+  // Scroll to review section
+  function scrollToReviews() {
+    reviewSection.scrollIntoView({ behavior: 'smooth' });
+  }
+
   // Initialize
   renderProducts();
+  loadReviews();
 
   // Event listeners
   backBtn.addEventListener('click', showProductPage);
@@ -1128,11 +1402,41 @@
   });
 
   historyBtn.addEventListener('click', showHistoryModal);
+  reviewBtn.addEventListener('click', scrollToReviews);
 
   // Close confirmation popup
   popupOkBtn.addEventListener('click', () => {
     confirmationPopup.style.display = 'none';
     showProductPage();
+  });
+
+  // Review form submission
+  reviewForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('reviewerName').value.trim();
+    const rating = document.querySelector('input[name="rating"]:checked');
+    const text = document.getElementById('reviewText').value.trim();
+    
+    if (!name || !rating || !text) {
+      alert('দয়া করে সকল তথ্য প্রদান করুন');
+      return;
+    }
+    
+    // Save the review
+    saveReview({
+      name: name,
+      rating: parseInt(rating.value),
+      text: text
+    });
+    
+    // Reload reviews
+    loadReviews();
+    
+    // Reset the form
+    reviewForm.reset();
+    
+    alert('আপনার রিভিউ সাবমিট করা হয়েছে! ধন্যবাদ।');
   });
 
   // Send message to Telegram using a proxy
@@ -1177,6 +1481,12 @@
     if (!selectedId) return 'দয়া করে একটি প্রোডাক্ট নির্বাচন করুন';
     if (!senderNumber.value.trim()) return 'দয়া করে আপনার পেমেন্ট নম্বর লিখুন';
     if (!tgUsername.value.trim()) return 'দয়া করে আপনার টেলিগ্রাম ব্যবহারকারীর নাম লিখুন';
+    
+    // Additional validation for Color Trading product
+    if (selectedId === 6 && !gameUserId.value.trim()) {
+      return 'দয়া করে আপনার গেম ইউজার আইডি লিখুন';
+    }
+    
     return null;
   }
 
@@ -1192,17 +1502,27 @@
     }
 
     const p = products.find(x => x.id === selectedId);
-    const msg = [
+    
+    // Prepare the message
+    let msg = [
       '<b>🧾 নতুন পেমেন্টের বিবরণ</b>',
       `প্রোডাক্ট: ${p.name}`,
       `মূল্য: ৳ ${p.price}`,
       `পেমেন্ট মাধ্যম: ${selectedMethod}`,
       `পেমেন্ট নম্বর: ${PAY_NUMBER}`,
       `প্রেরকের নম্বর: ${senderNumber.value.trim()}`,
-      `টেলিগ্রাম: ${tgUsername.value.trim()}`,
-      `বিবরণ: ${details.value.trim() || '—'}`,
-      `সময়: ${new Date().toLocaleString('bn-BD')}`
-    ].join('\n');
+      `টেলিগ্রাম: ${tgUsername.value.trim()}`
+    ];
+    
+    // Add game user ID if it's the Color Trading product
+    if (selectedId === 6) {
+      msg.push(`গেম ইউজার আইডি: ${gameUserId.value.trim()}`);
+    }
+    
+    msg.push(`বিবরণ: ${details.value.trim() || '—'}`);
+    msg.push(`সময়: ${new Date().toLocaleString('bn-BD')}`);
+    
+    const fullMsg = msg.join('\n');
 
     // Show loading state in confirmation popup
     popupIcon.innerHTML = '<div class="loading-spinner"></div>';
@@ -1212,7 +1532,7 @@
     confirmationPopup.style.display = 'flex';
 
     try {
-      const res = await sendToTelegram(msg);
+      const res = await sendToTelegram(fullMsg);
       
       if (res && res.ok) {
         // Save transaction to history
@@ -1222,6 +1542,7 @@
           paymentMethod: selectedMethod,
           senderNumber: senderNumber.value.trim(),
           tgUsername: tgUsername.value.trim(),
+          gameUserId: selectedId === 6 ? gameUserId.value.trim() : '',
           details: details.value.trim()
         });
         
@@ -1237,6 +1558,7 @@
         // Reset form
         senderNumber.value = '';
         tgUsername.value = '';
+        gameUserId.value = '';
         details.value = '';
       } else {
         throw new Error('Failed to send');
